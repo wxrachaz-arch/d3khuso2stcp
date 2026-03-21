@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>#dekhuso2stcp</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#f0f2ff;--bg2:#e8ebfa;--white:#fff;
+  --border:#dde1f5;--border2:#c8cdf0;
+  --purple:#6366f1;--purple2:#818cf8;--purple3:#e0e7ff;--purple4:#4f46e5;
+  --gold:#f59e0b;--gold2:#fbbf24;--goldbg:#fffbeb;
+  --green:#10b981;--green2:#34d399;--greenbg:#ecfdf5;
+  --red:#ef4444;--red2:#f87171;--redbg:#fef2f2;
+  --blue:#3b82f6;--bluebg:#eff6ff;
+  --text:#1e1b4b;--text2:#6b7280;--text3:#9ca3af;
+  --sh:0 2px 8px rgba(99,102,241,.08),0 1px 3px rgba(0,0,0,.05);
+  --sh2:0 8px 32px rgba(99,102,241,.15);
+  --r:16px;--r2:12px;--r3:8px;
+}
+html,body{min-height:100%;font-family:'Noto Sans Thai',sans-serif;background:var(--bg);color:var(--text)}
+.wrap{max-width:500px;margin:0 auto;min-height:100vh}
+
+/* LOGIN */
+#s-login{min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,#eef0ff,#f5f3ff,#fdf4ff)}
+#s-login.show{display:flex}
+.login-card{width:100%;max-width:380px;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 12px 48px rgba(99,102,241,.18)}
+.login-banner{width:100%;height:150px;object-fit:cover;object-position:center top;display:block}
+.login-body{padding:20px 28px 32px}
+.login-logo{width:80px;height:80px;object-fit:contain;display:block;margin:0 auto 14px}
+.login-h1{text-align:center;font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px}
+.login-h2{text-align:center;font-size:13px;color:var(--text2);margin-bottom:24px}
+.lbl{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;display:block}
+.inp{width:100%;padding:13px 16px;border:2px solid var(--border);border-radius:var(--r2);font-family:inherit;font-size:16px;color:var(--text);background:var(--bg);outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--purple);background:#fff}
+.inp::placeholder{color:var(--text3)}
+.btn-login{width:100%;margin-top:14px;padding:15px;border:none;border-radius:var(--r2);background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(99,102,241,.35);transition:opacity .15s,transform .1s}
+.btn-login:active{transform:scale(.98)}
+.login-err{color:var(--red);font-size:13px;text-align:center;margin-top:8px;min-height:18px}
+
+/* MAIN */
+#s-main{display:none;flex-direction:column;min-height:100vh}
+#s-main.show{display:flex}
+
+/* TOPBAR */
+.topbar{background:#fff;border-bottom:1.5px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(99,102,241,.07)}
+.tb-left{display:flex;align-items:center;gap:10px}
+.tb-logo{width:32px;height:32px;object-fit:contain;display:block;flex-shrink:0}
+.tb-title{font-size:14px;font-weight:800;background:linear-gradient(135deg,var(--purple4),#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tb-right{display:flex;align-items:center;gap:8px}
+.av-btn{display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--border2);border-radius:40px;padding:4px 12px 4px 4px;cursor:pointer;transition:all .2s}
+.av-btn:hover{background:var(--purple3);border-color:var(--purple2)}
+.av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--gold));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0;border:2px solid var(--purple)}
+.av img{width:100%;height:100%;object-fit:cover}
+.av-name{font-size:13px;font-weight:600;color:var(--text)}
+.badge-a{background:linear-gradient(135deg,var(--gold),#d97706);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.btn-out{background:var(--redbg);border:1.5px solid #fca5a5;color:var(--red);padding:5px 12px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer}
+
+/* TABS */
+.tabs{background:#fff;border-bottom:2px solid var(--border);display:flex;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:11px 14px;font-family:inherit;font-size:13px;font-weight:500;background:none;border:none;color:var(--text2);cursor:pointer;white-space:nowrap;position:relative;transition:color .2s;flex-shrink:0}
+.tab.active{color:var(--purple);font-weight:700}
+.tab.active::after{content:'';position:absolute;bottom:-2px;left:6px;right:6px;height:2.5px;background:linear-gradient(90deg,var(--purple),#a855f7);border-radius:2px 2px 0 0}
+
+/* PAGES */
+.pages{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.page{display:none;padding:16px;animation:fadeUp .25s ease}
+.page.show{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* CARDS */
+.card{background:#fff;border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:var(--sh);border:1px solid var(--border)}
+.card-h{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+
+/* STAT */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{background:#fff;border-radius:var(--r2);padding:13px 14px;box-shadow:var(--sh);border:1px solid var(--border);position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r2) var(--r2) 0 0}
+.stat.purple::before{background:linear-gradient(90deg,var(--purple),var(--purple2))}
+.stat.gold::before{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.stat.green::before{background:linear-gradient(90deg,var(--green),var(--green2))}
+.stat.red::before{background:linear-gradient(90deg,var(--red),var(--red2))}
+.stat.blue::before{background:linear-gradient(90deg,var(--blue),#60a5fa)}
+.stat-lbl{font-size:11px;color:var(--text2);font-weight:500;margin-bottom:5px}
+.stat-v{font-size:26px;font-weight:800;line-height:1}
+.stat-v.purple{color:var(--purple4)}.stat-v.gold{color:#d97706}.stat-v.green{color:var(--green)}.stat-v.red{color:var(--red)}.stat-v.blue{color:var(--blue)}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:4px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border:none;border-radius:var(--r3);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .1s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn.full{width:100%;padding:14px;font-size:15px}
+.btn.sm{padding:6px 12px;font-size:12px;border-radius:7px}
+.btn.purple{background:linear-gradient(135deg,var(--purple),#a855f7);color:#fff;box-shadow:0 3px 12px rgba(99,102,241,.3)}
+.btn.green{background:linear-gradient(135deg,var(--green),#059669);color:#fff;box-shadow:0 3px 12px rgba(16,185,129,.25)}
+.btn.gold{background:linear-gradient(135deg,var(--gold),#d97706);color:#fff;box-shadow:0 3px 12px rgba(245,158,11,.25)}
+.btn.red{background:linear-gradient(135deg,var(--red),#dc2626);color:#fff;box-shadow:0 3px 12px rgba(239,68,68,.25)}
+.btn.ghost{background:var(--bg);border:1.5px solid var(--border2);color:var(--text2)}
+.btn.ghost:hover{border-color:var(--purple);color:var(--purple);background:var(--purple3)}
+
+/* FORM */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.fgrid .span2{grid-column:1/-1}
+.flbl{font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px;display:block}
+.finp{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:var(--r3);font-family:inherit;font-size:14px;color:var(--text);background:var(--bg);outline:none;transition:border-color .2s,background .2s}
+.finp:focus{border-color:var(--purple);background:#fff}
+.finp::placeholder{color:var(--text3)}
+select.finp option{background:#fff}
+textarea.finp{resize:vertical;min-height:72px}
+
+/* PILLS */
+.pill{display:inline-flex;align-items:center;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600}
+.pill.green{background:#dcfce7;color:#15803d}.pill.red{background:#fee2e2;color:#dc2626}
+.pill.gold{background:#fef3c7;color:#b45309}.pill.blue{background:#dbeafe;color:#2563eb}
+.pill.gray{background:#f3f4f6;color:var(--text2)}.pill.purple{background:var(--purple3);color:var(--purple4)}
+
+/* TABLE */
+.tblw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:380px}
+th{font-size:11px;font-weight:700;color:var(--text2);padding:7px 10px;text-align:left;border-bottom:2px solid var(--border);background:var(--bg);white-space:nowrap}
+td{padding:9px 10px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border:none}
+tr:hover td{background:#f8f9ff}
+
+/* BANNER */
+.banner{border-radius:var(--r);padding:15px 18px;margin-bottom:14px}
+.banner.warn{background:linear-gradient(135deg,#fffbeb,#fef9e7);border:1.5px solid #fde68a}
+.banner.danger{background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1.5px solid #fca5a5}
+.banner.success{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac}
+.banner.info{background:linear-gradient(135deg,var(--purple3),#f0f2ff);border:1.5px solid #a5b4fc}
+.btitle{font-size:15px;font-weight:700;margin-bottom:4px}
+.banner.warn .btitle{color:#92400e}.banner.danger .btitle{color:#991b1b}.banner.success .btitle{color:#166534}.banner.info .btitle{color:#3730a3}
+.bsub{font-size:13px;color:var(--text2);line-height:1.6}
+.bamt{font-size:28px;font-weight:800;margin:6px 0 4px}
+.banner.warn .bamt{color:#d97706}.banner.danger .bamt{color:var(--red)}
+
+/* HISTORY */
+.hi{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.hi:last-child{border:none}
+.hil{display:flex;align-items:center;gap:10px}
+.hidot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.hiname{font-size:13px;font-weight:600}.hidate{font-size:11px;color:var(--text3);margin-top:2px}
+.hiamt{font-size:14px;font-weight:800;color:var(--green);white-space:nowrap}
+
+/* PROFILE */
+.profbox{display:flex;flex-direction:column;align-items:center;padding:20px 0 14px;text-align:center}
+.pav{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;overflow:hidden;border:4px solid var(--purple3);box-shadow:var(--sh2);position:relative;cursor:pointer}
+.pav img{width:100%;height:100%;object-fit:cover}
+.pcam{position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--purple);border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:12px}
+.pname{font-size:20px;font-weight:800;margin-top:12px}.pid{font-size:13px;color:var(--text2);margin-top:3px}
+.ptotal{background:linear-gradient(135deg,var(--purple3),#f0f2ff);border:1.5px solid #a5b4fc;border-radius:var(--r);padding:16px;text-align:center;margin:14px 0}
+.ptlbl{font-size:12px;color:var(--purple4);font-weight:600}
+.ptval{font-size:36px;font-weight:800;color:var(--purple4);margin-top:4px}
+
+/* BANK */
+.bankbox{background:linear-gradient(135deg,#fffbeb,#fef9ee);border:2px solid #fde68a;border-radius:var(--r2);padding:18px;text-align:center;margin-bottom:14px}
+.bankttl{font-size:11px;color:#92400e;font-weight:700;margin-bottom:8px;letter-spacing:.5px}
+.banknum{font-size:24px;font-weight:800;color:#78350f;letter-spacing:4px;margin:6px 0}
+.bankowner{font-size:14px;color:#b45309;font-weight:600}
+
+/* SLIP */
+.slipzone{border:2.5px dashed var(--border2);border-radius:var(--r2);padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);position:relative;min-height:100px}
+.slipzone:hover{border-color:var(--purple);background:var(--purple3)}
+.slipzone input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0;width:100%;height:100%}
+.slipimgp{width:100%;max-height:240px;object-fit:contain;border-radius:10px;margin-top:12px;display:none}
+.vok{background:#f0fdf4;border:1.5px solid #86efac;border-radius:var(--r3);padding:12px;text-align:center;color:#15803d;margin-top:10px;font-weight:600;font-size:13px}
+.vwait{background:var(--bluebg);border:1.5px solid #93c5fd;border-radius:var(--r3);padding:12px;text-align:center;color:var(--blue);margin-top:10px;font-size:13px}
+
+/* ADMIN */
+.ritem{background:var(--bg);border:1.5px solid var(--border2);border-radius:var(--r2);padding:14px;margin-bottom:10px}
+.ritem.aopen{background:linear-gradient(135deg,#fffbeb,#fef9ee);border-color:#fcd34d}
+.rrow{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.rttl{font-size:14px;font-weight:700}.rmeta{font-size:12px;color:var(--text2);margin-top:5px;display:flex;gap:10px;flex-wrap:wrap}
+.ract{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap}
+.sqrow{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
+.sqrow:last-child{border:none}
+.sqthumb{width:42px;height:42px;border-radius:9px;object-fit:cover;cursor:pointer;border:1.5px solid var(--border2);flex-shrink:0}
+
+/* VISITOR */
+.vrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.vrow:last-child{border:none}
+.vdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.vname{font-size:13px;font-weight:600}.vtime{font-size:11px;color:var(--text3)}
+
+/* SEARCH */
+.sbox{position:relative;margin-bottom:12px}
+.sbox .finp{padding-left:36px}
+.sico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+
+/* HOME BANNER IMG */
+.home-banner-img{width:100%;height:160px;object-fit:cover;object-position:center top;display:block;border-radius:var(--r);margin-bottom:14px;box-shadow:var(--sh2)}
+
+/* MODAL */
+.mbg{display:none;position:fixed;inset:0;background:rgba(30,27,75,.35);backdrop-filter:blur(5px);z-index:200;align-items:flex-end;justify-content:center}
+.mbg.show{display:flex}
+.modal{background:#fff;border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;animation:slideUp .3s cubic-bezier(.34,1.4,.64,1)}
+.modal.center{border-radius:24px;margin:auto;animation:popIn .3s cubic-bezier(.34,1.4,.64,1)}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.mh{font-size:17px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;color:var(--text)}
+.mclose{background:var(--bg2);border:none;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)}
+
+/* TOAST */
+.twrap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;align-items:center;width:calc(100% - 32px);max-width:380px;pointer-events:none}
+.toast{padding:12px 20px;border-radius:40px;font-size:14px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.18);animation:tin .3s ease,tout .3s ease 2.7s forwards;display:flex;align-items:center;gap:8px;color:#fff}
+.toast.success{background:linear-gradient(135deg,#065f46,#059669)}
+.toast.error{background:linear-gradient(135deg,#991b1b,#ef4444)}
+.toast.info{background:linear-gradient(135deg,#3730a3,#6366f1)}
+@keyframes tin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes tout{to{opacity:0;transform:translateY(-8px)}}
+.sec-h{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;padding-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- LOGIN -->
+<div id="s-login" class="show">
+  <div class="login-card">
+    <img class="login-banner" id="img-login-banner" src="banner.png" alt="banner"/>
+    <div class="login-body">
+      <img class="login-logo" id="img-login-logo" src="logo.png" alt="logo"/>
+      <div class="login-h1">#dekhuso2stcp</div>
+      <div class="login-h2">เข้าสู่ระบบด้วยรหัสนักเรียน</div>
+      <label class="lbl">รหัสนักเรียน</label>
+      <input class="inp" id="inp-id" type="number" inputmode="numeric" placeholder="เช่น 36751" maxlength="6" autocomplete="off"/>
+      <button class="btn-login" onclick="doLogin()">เข้าสู่ระบบ →</button>
+      <div class="login-err" id="login-err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="s-main">
+  <div class="topbar">
+    <div class="tb-left">
+      <img class="tb-logo" id="img-tb-logo" src="logo.png" alt="logo"/>
+      <span class="tb-title">#dekhuso2stcp</span>
+    </div>
+    <div class="tb-right">
+      <div class="av-btn" onclick="showTab('profile')">
+        <div class="av" id="nav-av"><span id="nav-init">?</span></div>
+        <span class="av-name" id="nav-name">-</span>
+        <span class="badge-a" id="nav-badge" style="display:none">เก็บเงิน</span>
+      </div>
+      <button class="btn-out" onclick="doLogout()">ออก</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="tab-home"    onclick="showTab('home')">🏠 หน้าหลัก</button>
+    <button class="tab"        id="tab-members" onclick="showTab('members')">👥 สมาชิก</button>
+    <button class="tab"        id="tab-pay"     onclick="showTab('pay')">💳 จ่ายเงิน</button>
+    <button class="tab"        id="tab-history" onclick="showTab('history')">📋 ประวัติ</button>
+    <button class="tab"        id="tab-profile" onclick="showTab('profile')">👤 โปรไฟล์</button>
+    <button class="tab"        id="tab-admin"   onclick="showTab('admin')" style="display:none">⚙️ หลังบ้าน</button>
+  </div>
+  <div class="pages">
+
+    <!-- HOME -->
+    <div class="page show" id="page-home">
+      <img class="home-banner-img" id="img-home-banner" src="banner.png" alt="banner"/>
+      <div id="home-banner"></div>
+      <div class="stat-grid">
+        <div class="stat purple"><div class="stat-lbl">💰 เงินรวมทั้งหมด</div><div class="stat-v purple" id="home-total">฿0</div><div class="stat-sub" id="home-sub">-</div></div>
+        <div class="stat gold"><div class="stat-lbl">👥 สมาชิก</div><div class="stat-v gold" id="home-mem">0</div><div class="stat-sub">คน</div></div>
+        <div class="stat green"><div class="stat-lbl">✅ จ่ายแล้ว (รอบนี้)</div><div class="stat-v green" id="home-paid">-</div><div class="stat-sub">คน</div></div>
+        <div class="stat red"><div class="stat-lbl">⏳ ยังไม่จ่าย</div><div class="stat-v red" id="home-unpaid">-</div><div class="stat-sub">คน</div></div>
+      </div>
+      <div class="stat blue" style="border-radius:var(--r2);padding:12px 15px;background:#fff;border:1px solid var(--border);box-shadow:var(--sh);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
+        <div><div class="stat-lbl">👁 เข้าเว็บวันนี้</div><div class="stat-v blue" id="home-vis">0</div></div>
+        <span style="font-size:28px">📊</span>
+      </div>
+      <div class="card">
+        <div class="card-h">📋 รายการล่าสุด <button class="btn gold sm" onclick="dlPDF()">⬇️ PDF</button></div>
+        <div id="home-recent"><p style="font-size:13px;color:var(--text3)">ยังไม่มีรายการ</p></div>
+      </div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div class="page" id="page-members">
+      <div class="card">
+        <div class="card-h">👥 รายชื่อสมาชิก <span id="mem-cnt" style="font-size:12px;color:var(--text3);font-weight:500"></span></div>
+        <div class="sbox"><span class="sico">🔍</span><input class="finp" id="mem-srch" placeholder="ค้นหาชื่อหรือรหัส…" oninput="renderMembers()"/></div>
+        <div class="tblw"><table><thead><tr><th>รหัส</th><th>ชื่อ-สกุล</th><th>สถานะ</th><th>ยอดสะสม</th><th>สลิป</th></tr></thead><tbody id="mem-body"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- PAY -->
+    <div class="page" id="page-pay">
+      <div id="pay-sts"></div>
+      <div id="pay-noround" style="display:none">
+        <div class="card" style="text-align:center;padding:44px 20px">
+          <div style="font-size:52px;margin-bottom:14px">😴</div>
+          <div style="font-size:17px;font-weight:800;margin-bottom:6px">ยังไม่มีรอบเก็บเงิน</div>
+          <div style="font-size:13px;color:var(--text2)">รอประกาศจากผู้ดูแลห้องนะคะ</div>
+        </div>
+      </div>
+      <div id="pay-main" style="display:none">
+        <div class="bankbox">
+          <div class="bankttl">🏦 ช่องทางการโอนเงิน</div>
+          <div style="font-size:13px;color:#92400e;margin-bottom:2px">ธนาคารออมสิน</div>
+          <div class="banknum">020 4643 39082</div>
+          <div class="bankowner">ด.ช.ชลธิชา โถชัย</div>
+        </div>
+        <div class="card">
+          <div class="card-h">📎 แนบสลิปการโอน</div>
+          <div class="slipzone" id="slipzone">
+            <input type="file" id="slip-file" accept="image/*" onchange="handleSlip(event)"/>
+            <div id="slip-ph"><div style="font-size:36px;margin-bottom:10px">📷</div><div style="font-size:14px;font-weight:700;color:var(--text2)">แตะเพื่อเลือกสลิป</div><div style="font-size:12px;color:var(--text3);margin-top:4px">JPG, PNG</div></div>
+            <img id="slip-imgp" class="slipimgp"/>
+          </div>
+          <div id="slip-verify"></div>
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <button class="btn green" id="slip-sub" style="display:none" onclick="submitSlip()">✅ ส่งสลิปเพื่อตรวจสอบ</button>
+            <button class="btn ghost sm" onclick="clearSlip()">🗑 ล้างสลิป</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="page" id="page-history">
+      <div class="card">
+        <div class="card-h">📋 ประวัติการชำระ <button class="btn gold sm" onclick="dlPDF()">⬇️ PDF</button></div>
+        <div class="sbox"><span class="sico">🔍</span><input class="finp" id="hist-srch" placeholder="ค้นหา…" oninput="renderHistory()"/></div>
+        <div id="hist-list"><p style="font-size:13px;color:var(--text3)">ยังไม่มีประวัติ</p></div>
+      </div>
+      <div class="card">
+        <div class="card-h">👁 ประวัติเข้าเว็บ</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:10px" id="vis-sum">-</div>
+        <div id="vis-list"><p style="font-size:13px;color:var(--text3)">ยังไม่มีข้อมูล</p></div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="page" id="page-profile">
+      <div class="card">
+        <div class="profbox">
+          <div class="pav" id="prof-av" onclick="document.getElementById('av-file').click()">
+            <span id="prof-init">?</span>
+            <div class="pcam">📷</div>
+          </div>
+          <input type="file" id="av-file" accept="image/*" style="display:none" onchange="handleAvatar(event)"/>
+          <div class="pname" id="prof-name">-</div>
+          <div class="pid" id="prof-id">รหัส -</div>
+        </div>
+        <div class="ptotal"><div class="ptlbl">💜 ยอดสะสมของฉัน</div><div class="ptval" id="prof-total">฿0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-h">📈 ประวัติของฉัน</div>
+        <div id="prof-hist"><p style="font-size:13px;color:var(--text3)">ยังไม่มีรายการ</p></div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="page" id="page-admin">
+      <div class="sec-h">📅 สร้างรอบเก็บเงิน</div>
+      <div class="card">
+        <div class="fgrid">
+          <div><label class="flbl">วันที่กำหนดเก็บ</label><input class="finp" type="date" id="r-date"/></div>
+          <div><label class="flbl">จำนวนเงิน (บาท)</label><input class="finp" type="number" id="r-amt" placeholder="0" min="1"/></div>
+          <div class="span2"><label class="flbl">เหตุผล (แสดงให้เพื่อนเห็น)</label><textarea class="finp" id="r-reason" placeholder="เช่น เงินบำรุงห้องเรียน มีนาคม 2568"></textarea></div>
+        </div>
+        <button class="btn purple full" onclick="createRound()">📢 ประกาศเก็บเงินเลย</button>
+      </div>
+      <div class="sec-h">📋 รอบเก็บเงินทั้งหมด</div>
+      <div id="admin-rounds"><p style="font-size:13px;color:var(--text3);padding:4px 0">ยังไม่มีรอบ</p></div>
+      <div class="sec-h">✏️ บันทึกการชำระด้วยตนเอง</div>
+      <div class="card">
+        <div class="fgrid">
+          <div><label class="flbl">สมาชิก</label><select class="finp" id="rec-member"><option value="">-- เลือกชื่อ --</option></select></div>
+          <div><label class="flbl">จำนวนเงิน (บาท)</label><input class="finp" type="number" id="rec-amt" placeholder="0" min="1"/></div>
+          <div><label class="flbl">รอบที่ชำระ</label><select class="finp" id="rec-round"><option value="">-- เลือกรอบ --</option></select></div>
+          <div><label class="flbl">หมายเหตุ</label><input class="finp" type="text" id="rec-note" placeholder="หมายเหตุ (ถ้ามี)"/></div>
+        </div>
+        <button class="btn green full" onclick="recordPayment()">✅ บันทึกการชำระ</button>
+      </div>
+      <div class="sec-h" style="display:flex;align-items:center;justify-content:space-between">
+        🔍 ตรวจสลิปรอยืนยัน
+        <span id="slip-badge" style="background:#fee2e2;color:var(--red);font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;display:none"></span>
+      </div>
+      <div class="card"><div id="slip-queue"><p style="font-size:13px;color:var(--text3)">ไม่มีสลิปรอตรวจสอบ 🎉</p></div></div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- MODALS -->
+<div class="mbg" id="m-ok">
+  <div class="modal center" style="max-width:320px">
+    <div style="text-align:center;padding:8px 0">
+      <div style="font-size:52px;margin-bottom:12px" id="m-emoji">🎉</div>
+      <div style="font-size:20px;font-weight:800;margin-bottom:8px;color:var(--text)" id="m-title">สำเร็จ!</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:20px;line-height:1.6" id="m-body">-</div>
+      <button class="btn green full" onclick="cm('m-ok')">ตกลง</button>
+    </div>
+  </div>
+</div>
+<div class="mbg" id="m-slip">
+  <div class="modal">
+    <div class="mh">🧾 สลิปการโอน <button class="mclose" onclick="cm('m-slip')">✕</button></div>
+    <img id="ms-img" style="width:100%;border-radius:12px;max-height:320px;object-fit:contain"/>
+    <div id="ms-info" style="font-size:13px;color:var(--text2);margin:10px 0;line-height:1.6"></div>
+    <div id="ms-act" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+  </div>
+</div>
+<div class="mbg" id="m-round">
+  <div class="modal">
+    <div class="mh" id="mr-title">รายละเอียดรอบ <button class="mclose" onclick="cm('m-round')">✕</button></div>
+    <div id="mr-body"></div>
+  </div>
+</div>
+<div class="twrap" id="twrap"></div>
+<script>
+const MB=[
+  {id:'36751',name:'ธนัชพร ทิพย์รักษ์'},{id:'36752',name:'ธิติมาภรณ์ เพิ่มฆะเซ็นต์'},
+  {id:'36759',name:'พาณิภัค นุยภูเขียว'},{id:'36768',name:'สุชาวดี ละแมนชัย'},
+  {id:'36819',name:'กัลญาวรรณ โชควิเศษ'},{id:'36832',name:'ธิดารัตน์ หาญพนา'},
+  {id:'36837',name:'พรชรินทร์ สุขสิงห์'},{id:'36843',name:'เพชรปทิตา ไชยโย'},
+  {id:'36852',name:'สุวรรณรัตน์ ญาติปราโมทย์'},{id:'36855',name:'อาทิตยา เพียรชัยภูมิ'},
+  {id:'36877',name:'พรรณธิดา ศรีวิลัย'},{id:'36878',name:'พัชราภรณ์ ขันชัยภูมิ'},
+  {id:'36916',name:'ปิ่นประภา สอนหินลาด'},{id:'36948',name:'ณฐกานต์ เชื้อนุ่น'},
+  {id:'36949',name:'ณัชชา เทศนิยม'},{id:'36950',name:'ณัฏฐ์ชยา บุตตะศรี'},
+  {id:'36964',name:'พิมพ์รดา แกมคำ'},{id:'37014',name:'อรณิชา เทศเสนาะ'},
+  {id:'37026',name:'ณัฐณิชา พันธ์ไชย'},{id:'37055',name:'อรชพร ดวงประทุม'},
+  {id:'37063',name:'จิรสุดา เสมา'},{id:'37070',name:'ณิชากร รักษ์มณี'},
+  {id:'37104',name:'ญาสุมินทร์ ครองถิ่น'},{id:'37139',name:'ฉันทพิชญา เจือหนองแวง'},
+  {id:'37141',name:'ชลธิชา โถชัย'},{id:'37153',name:'ปวรวรรรณ พันธุ์สามารถ'},
+  {id:'37165',name:'วิภาวี จรแก้ว'},{id:'37167',name:'วิลาวรรณ กิ่งนอก'},
+  {id:'37168',name:'วิลาสิณีย์ บุญหว่าน'},{id:'38664',name:'พัชราภา สังฆตะอำพน'},
+  {id:'39250',name:'กฤษติยาพร ทองเหง่า'},{id:'39251',name:'เขมนิจ คำโนนจาน'},
+  {id:'39252',name:'วทันยา เรืองสีนุ่น'},{id:'39253',name:'ศิรารัตน์ อาจเค'},
+  {id:'39254',name:'สุวิชาดา เกษรดอกจันทร์'},{id:'39255',name:'สิวริศร ไชยพิมพ์'},
+  {id:'39256',name:'ณัฐพงษ์ เฉลียวชาติ'},{id:'39257',name:'ภควัติ จันทร์สว่าง'},
+  {id:'39258',name:'วีระชัย โยธา'},{id:'39333',name:'ชินพงษ์ วงษา'},
+];
+const ADMINS=['37141','39258'];
+const KP='rm5_pay',KPR='rm5_pro',KR='rm5_rnd',KS='rm5_sl',KV='rm5_vis';
+let CU=null,pays=[],pros={},rnds=[],slps=[],vis=[],curSlip=null;
+
+function ld(){const g=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}};pays=g(KP,[]);pros=g(KPR,{});rnds=g(KR,[]);slps=g(KS,[]);vis=g(KV,[]);}
+function sd(){try{localStorage.setItem(KP,JSON.stringify(pays));localStorage.setItem(KPR,JSON.stringify(pros));localStorage.setItem(KR,JSON.stringify(rnds));localStorage.setItem(KS,JSON.stringify(slps));localStorage.setItem(KV,JSON.stringify(vis));}catch(e){toast('Storage เต็ม','error');}}
+function setText(id,val){var el=document.getElementById(id);if(el)el.textContent=val;}
+function setHTML(id,val){var el=document.getElementById(id);if(el)el.innerHTML=val;}
+function getAR(){return rnds.find(function(r){return r.status==='active';})||null;}
+function mpays(id){return pays.filter(function(p){return p.memberId===id;});}
+function mtotal(id){return mpays(id).reduce(function(s,p){return s+p.amount;},0);}
+function rPaid(rid,uid){return !!(pays.find(function(p){return p.roundId===rid&&p.memberId===uid;})||slps.find(function(s){return s.roundId===rid&&s.memberId===uid&&s.status==='approved';}));}
+function rPend(rid,uid){return !!slps.find(function(s){return s.roundId===rid&&s.memberId===uid&&s.status==='pending';});}
+function fdt(ts){return new Date(ts).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function fd(ts){return new Date(ts).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});}
+function avH(uid,sz){var pr=pros[uid]||{};var m=MB.find(function(x){return x.id===uid;});var ini=m?m.name.slice(0,2):'?';if(pr.avatar){return '<img src="'+pr.avatar+'" style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;object-fit:cover;flex-shrink:0">';}return '<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:'+Math.round(sz/3)+'px;font-weight:700;color:#fff;flex-shrink:0">'+ini+'</div>';}
+function navRefresh(){var pr=pros[CU.id]||{};var el=document.getElementById('nav-av');if(!el)return;el.innerHTML=pr.avatar?'<img src="'+pr.avatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'  :'<span id="nav-init">'+CU.name.slice(0,2)+'</span>';}
+
+document.getElementById('inp-id').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+function doLogin(){
+  var id=String(document.getElementById('inp-id').value).trim();
+  var m=MB.find(function(x){return x.id===id;});
+  var errEl=document.getElementById('login-err');
+  if(!m){if(errEl)errEl.textContent='ไม่พบรหัสนักเรียนนี้ในระบบ';return;}
+  if(errEl)errEl.textContent='';
+  CU=m; pays=[];pros={};rnds=[];slps=[];vis=[];curSlip=null;
+  ld();logV();initApp();
+}
+function doLogout(){
+  CU=null;curSlip=null;pays=[];pros={};rnds=[];slps=[];vis=[];
+  var login=document.getElementById('s-login');var main=document.getElementById('s-main');
+  if(login)login.classList.add('show');if(main)main.style.display='none';
+  var inp=document.getElementById('inp-id');if(inp){inp.value='';inp.focus();}
+  setText('login-err','');
+}
+function logV(){var today=new Date().toDateString();vis=vis.filter(function(v){return !(v.id===CU.id&&new Date(v.time).toDateString()===today);});vis.unshift({id:CU.id,name:CU.name,time:Date.now()});if(vis.length>300)vis=vis.slice(0,300);sd();}
+
+function initApp(){
+  var loginEl=document.getElementById('s-login');var mainEl=document.getElementById('s-main');
+  if(loginEl)loginEl.classList.remove('show');if(mainEl)mainEl.style.display='flex';
+  var isA=ADMINS.indexOf(CU.id)!==-1;
+  navRefresh();
+  setText('nav-name',CU.name.split(' ')[0]||CU.name);
+  var nb=document.getElementById('nav-badge');if(nb)nb.style.display=isA?'inline-flex':'none';
+  var ta=document.getElementById('tab-admin');if(ta)ta.style.display=isA?'block':'none';
+  if(isA){
+    var ms=document.getElementById('rec-member');
+    if(ms){ms.innerHTML='<option value="">-- เลือกชื่อ --</option>';MB.forEach(function(m){var o=document.createElement('option');o.value=m.id;o.textContent=m.id+' - '+m.name;ms.appendChild(o);});}
+  }
+  showTab('home');
+  setTimeout(function(){var ar=getAR();if(ar&&!rPaid(ar.id,CU.id)&&!rPend(ar.id,CU.id))toast('มีรอบเก็บเงิน: '+ar.reason,'info');},900);
+}
+
+var ALL_TABS=['home','members','pay','history','profile','admin'];
+function showTab(t){
+  ALL_TABS.forEach(function(x){var p=document.getElementById('page-'+x);if(p)p.classList.remove('show');var b=document.getElementById('tab-'+x);if(b)b.classList.remove('active');});
+  var pg=document.getElementById('page-'+t);if(pg)pg.classList.add('show');
+  var btn=document.getElementById('tab-'+t);if(btn)btn.classList.add('active');
+  if(t==='home')renderHome();
+  if(t==='members')renderMembers();
+  if(t==='pay')renderPay();
+  if(t==='history'){renderHistory();renderVis();}
+  if(t==='profile')renderProf();
+  if(t==='admin'){fillRndSel();renderRounds();renderSlipQ();}
+}
+
+function renderHome(){
+  var total=pays.reduce(function(s,p){return s+p.amount;},0);
+  setText('home-total','฿'+total.toLocaleString());setText('home-sub','รวม '+MB.length+' คน');setText('home-mem',MB.length);
+  var ar=getAR();var pc=0,uc=0;if(ar)MB.forEach(function(m){rPaid(ar.id,m.id)?pc++:uc++;});
+  setText('home-paid',ar?pc:'-');setText('home-unpaid',ar?uc:'-');
+  var today=new Date().toDateString();var vt=new Set(vis.filter(function(v){return new Date(v.time).toDateString()===today;}).map(function(v){return v.id;})).size;
+  setText('home-vis',vt);
+  if(ar){var ds=new Date(ar.date+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});setHTML('home-banner','<div class="banner warn"><div class="btitle">📢 รอบเก็บเงิน</div><div class="bamt">฿'+ar.amount.toLocaleString()+'</div><div class="bsub">'+ar.reason+'<br>กำหนด: '+ds+'</div><div style="margin-top:10px"><button class="btn gold sm" onclick="showTab(\'pay\')">💳 ไปชำระ →</button></div></div>');}
+  else setHTML('home-banner','');
+  var rc=[].concat(pays).sort(function(a,b){return b.time-a.time;}).slice(0,8);
+  if(!rc.length){setHTML('home-recent','<p style="font-size:13px;color:var(--text3)">ยังไม่มีรายการ</p>');return;}
+  setHTML('home-recent',rc.map(function(p){var m=MB.find(function(x){return x.id===p.memberId;});return '<div class="hi"><div class="hil"><div class="hidot"></div><div><div class="hiname">'+(m?m.name:p.memberId)+'</div><div class="hidate">'+fdt(p.time)+(p.note?' · '+p.note:'')+'</div></div></div><div class="hiamt">+฿'+p.amount.toLocaleString()+'</div></div>';}).join(''));
+}
+
+function renderMembers(){
+  var q=(document.getElementById('mem-srch')||{value:''}).value.toLowerCase();
+  var f=MB.filter(function(m){return m.name.toLowerCase().indexOf(q)!==-1||m.id.indexOf(q)!==-1;});
+  setText('mem-cnt',f.length+' คน');
+  var ar=getAR();
+  setHTML('mem-body',f.map(function(m){
+    var st='';
+    if(ar){if(rPaid(ar.id,m.id))st='<span class="pill green">✅ จ่ายแล้ว</span>';else if(rPend(ar.id,m.id))st='<span class="pill gold">⏳ รอตรวจ</span>';else st='<span class="pill red">❌ ยังไม่จ่าย</span>';}
+    else st=mtotal(m.id)>0?'<span class="pill purple">เคยจ่าย</span>':'<span class="pill gray">-</span>';
+    var sl=ar?slps.find(function(s){return s.memberId===m.id&&s.roundId===ar.id;}):null;
+    return '<tr><td style="color:var(--text3);font-size:12px">'+m.id+'</td><td><div style="display:flex;align-items:center;gap:7px">'+avH(m.id,26)+m.name+'</div></td><td>'+st+'</td><td style="font-weight:700;color:var(--purple4)">฿'+mtotal(m.id).toLocaleString()+'</td><td>'+(sl?'<img class="sqthumb" src="'+sl.image+'" onclick="viewSlip(\''+sl.id+'\')"/>'  :'<span style="color:var(--text3)">-</span>')+'</td></tr>';
+  }).join(''));
+}
+
+function renderPay(){
+  var ar=getAR();var noR=document.getElementById('pay-noround');var pM=document.getElementById('pay-main');
+  if(!ar){if(noR)noR.style.display='block';if(pM)pM.style.display='none';setHTML('pay-sts','');return;}
+  if(noR)noR.style.display='none';if(pM)pM.style.display='block';
+  var paid=rPaid(ar.id,CU.id),pend=rPend(ar.id,CU.id);
+  var ds=new Date(ar.date+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
+  if(paid)setHTML('pay-sts','<div class="banner success"><div class="btitle">✅ คุณชำระเงินแล้ว!</div><div class="bsub">รอบ: '+ar.reason+'</div></div>');
+  else if(pend)setHTML('pay-sts','<div class="banner info"><div class="btitle">⏳ สลิปรอการตรวจสอบ</div><div class="bsub">ผู้ดูแลจะยืนยันเร็วๆ นี้</div></div>');
+  else setHTML('pay-sts','<div class="banner danger"><div class="btitle">⚠️ ยังไม่ได้ชำระ</div><div class="bamt">฿'+ar.amount.toLocaleString()+'</div><div class="bsub">'+ar.reason+'<br>กำหนด: '+ds+'<br>โปรดโอนและแนบสลิปด้านล่าง</div></div>');
+}
+
+function handleSlip(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){curSlip=ev.target.result;var img=document.getElementById('slip-imgp');if(img){img.src=curSlip;img.style.display='block';}var ph=document.getElementById('slip-ph');if(ph)ph.style.display='none';var sb=document.getElementById('slip-sub');if(sb)sb.style.display='inline-flex';chkSlip();};r.readAsDataURL(f);}
+function clearSlip(){curSlip=null;var sf=document.getElementById('slip-file');if(sf)sf.value='';var img=document.getElementById('slip-imgp');if(img){img.style.display='none';img.src='';}var ph=document.getElementById('slip-ph');if(ph)ph.style.display='block';var sb=document.getElementById('slip-sub');if(sb)sb.style.display='none';setHTML('slip-verify','');}
+function chkSlip(){setHTML('slip-verify','<div class="vwait">🔄 กำลังตรวจสอบ...</div>');setTimeout(function(){var ar=getAR();if(!ar){setHTML('slip-verify','<div class="vwait" style="background:var(--redbg);border-color:#fca5a5;color:var(--red)">❌ ไม่มีรอบเปิด</div>');return;}if(curSlip&&curSlip.length>4000)setHTML('slip-verify','<div class="vok">✅ ตรวจพบสลิป · กดปุ่มส่งเพื่อให้ผู้ดูแลตรวจสอบ</div>');else setHTML('slip-verify','<div class="vwait" style="background:var(--redbg);border-color:#fca5a5;color:var(--red)">⚠️ ไม่สามารถอ่านไฟล์</div>');},1300);}
+function submitSlip(){if(!curSlip){toast('กรุณาแนบสลิป','error');return;}var ar=getAR();if(!ar){toast('ไม่มีรอบ','error');return;}if(rPaid(ar.id,CU.id)){toast('ชำระแล้ว','info');return;}if(rPend(ar.id,CU.id)){toast('มีสลิปรออยู่','info');return;}slps.push({id:'sl_'+Date.now(),memberId:CU.id,memberName:CU.name,roundId:ar.id,roundReason:ar.reason,amount:ar.amount,image:curSlip,status:'pending',time:Date.now()});sd();clearSlip();renderPay();showOK('📨','ส่งสลิปสำเร็จ!','สลิปของ '+CU.name+' ส่งรอตรวจสอบแล้ว');}
+
+function renderHistory(){var q=(document.getElementById('hist-srch')||{value:''}).value.toLowerCase();var list=[].concat(pays).sort(function(a,b){return b.time-a.time;}).filter(function(p){var m=MB.find(function(x){return x.id===p.memberId;});return !q||(m&&m.name.toLowerCase().indexOf(q)!==-1)||p.memberId.indexOf(q)!==-1||(p.note&&p.note.toLowerCase().indexOf(q)!==-1);});if(!list.length){setHTML('hist-list','<p style="font-size:13px;color:var(--text3)">ไม่พบรายการ</p>');return;}setHTML('hist-list',list.map(function(p){var m=MB.find(function(x){return x.id===p.memberId;});var rc=MB.find(function(x){return x.id===p.recordedBy;});return '<div class="hi"><div class="hil"><div class="hidot"></div><div><div class="hiname">'+(m?m.name:p.memberId)+'</div><div class="hidate">'+fdt(p.time)+(p.note?' · '+p.note:'')+(rc?' · โดย '+rc.name.split(' ')[0]:'')+'</div></div></div><div class="hiamt">+฿'+p.amount.toLocaleString()+'</div></div>';}).join(''));}
+function renderVis(){var today=new Date().toDateString();var vt=vis.filter(function(v){return new Date(v.time).toDateString()===today;});setText('vis-sum','เข้าวันนี้ '+new Set(vt.map(function(v){return v.id;})).size+' คน · ทั้งหมด '+new Set(vis.map(function(v){return v.id;})).size+' คน');if(!vis.length){setHTML('vis-list','<p style="font-size:13px;color:var(--text3)">ยังไม่มีข้อมูล</p>');return;}setHTML('vis-list',vis.slice(0,60).map(function(v){var isT=new Date(v.time).toDateString()===today;return '<div class="vrow"><div class="vdot" style="background:'+(isT?'var(--green)':'var(--text3)')+'"></div><div style="flex:1"><div class="vname">'+v.name+'</div><div class="vtime">'+fdt(v.time)+'</div></div>'+(isT?'<span class="pill green" style="font-size:11px;padding:2px 8px">วันนี้</span>':'')+'</div>';}).join(''));}
+
+function renderProf(){if(!CU)return;var pr=pros[CU.id]||{};var pavEl=document.getElementById('prof-av');if(pavEl){if(pr.avatar){pavEl.innerHTML='<img src="'+pr.avatar+'" style="width:100%;height:100%;object-fit:cover"><div class="pcam">📷</div>';navRefresh();}else{pavEl.innerHTML='<span>'+CU.name.slice(0,2)+'</span><div class="pcam">📷</div>';}}setText('prof-name',CU.name);setText('prof-id','รหัส '+CU.id+(ADMINS.indexOf(CU.id)!==-1?' · ผู้ดูแลห้อง 👑':''));setText('prof-total','฿'+mtotal(CU.id).toLocaleString());var plist=mpays(CU.id).sort(function(a,b){return b.time-a.time;});if(!plist.length){setHTML('prof-hist','<p style="font-size:13px;color:var(--text3)">ยังไม่มีรายการ</p>');return;}setHTML('prof-hist',plist.map(function(p){return '<div class="hi"><div class="hil"><div class="hidot"></div><div><div class="hiname">ชำระเงิน'+(p.note?' - '+p.note:'')+'</div><div class="hidate">'+fdt(p.time)+'</div></div></div><div class="hiamt">+฿'+p.amount.toLocaleString()+'</div></div>';}).join(''));}
+function handleAvatar(e){var f=e.target.files[0];if(!f||!CU)return;var r=new FileReader();r.onload=function(ev){if(!pros[CU.id])pros[CU.id]={};pros[CU.id].avatar=ev.target.result;sd();renderProf();toast('อัพโหลดรูปสำเร็จ','success');};r.readAsDataURL(f);}
+
+function createRound(){if(ADMINS.indexOf(CU.id)===-1)return;var date=document.getElementById('r-date').value;var amt=parseFloat(document.getElementById('r-amt').value)||0;var reason=document.getElementById('r-reason').value.trim();if(!date){toast('กรุณาเลือกวันที่','error');return;}if(amt<=0){toast('กรุณาระบุจำนวนเงิน','error');return;}if(!reason){toast('กรุณาระบุเหตุผล','error');return;}rnds.forEach(function(r){if(r.status==='active')r.status='closed';});rnds.unshift({id:'r_'+Date.now(),date:date,amount:amt,reason:reason,status:'active',by:CU.id,time:Date.now()});sd();document.getElementById('r-date').value='';document.getElementById('r-amt').value='';document.getElementById('r-reason').value='';renderRounds();fillRndSel();toast('ประกาศรอบเก็บเงินแล้ว!','success');}
+function renderRounds(){var el=document.getElementById('admin-rounds');if(!el)return;if(!rnds.length){el.innerHTML='<p style="font-size:13px;color:var(--text3)">ยังไม่มีรอบ</p>';return;}el.innerHTML=rnds.map(function(r){var pc=MB.filter(function(m){return rPaid(r.id,m.id);}).length;var pdc=slps.filter(function(s){return s.roundId===r.id&&s.status==='pending';}).length;var ds=new Date(r.date+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});return '<div class="ritem'+(r.status==='active'?' aopen':'')+'"><div class="rrow"><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="pill '+(r.status==='active'?'gold':'gray')+'">'+(r.status==='active'?'🟢 เปิดอยู่':'⚫ ปิดแล้ว')+'</span><span class="rttl">'+r.reason+'</span></div><div class="rmeta"><span>📅 '+ds+'</span><span>💰 ฿'+r.amount.toLocaleString()+'</span><span style="color:var(--green);font-weight:600">✅ '+pc+'/'+MB.length+'</span>'+(pdc>0?'<span style="color:var(--gold);font-weight:600">⏳ รอตรวจ '+pdc+'</span>':'')+'</div></div><div class="ract">'+(r.status==='active'?'<button class="btn ghost sm" onclick="closeRound(\''+r.id+'\')">ปิดรอบ</button>':'')+'<button class="btn ghost sm" onclick="showRndDetail(\''+r.id+'\')">รายละเอียด</button></div></div></div>';}).join('');}
+function closeRound(id){var r=rnds.find(function(x){return x.id===id;});if(r)r.status='closed';sd();renderRounds();toast('ปิดรอบแล้ว','success');}
+function showRndDetail(id){var r=rnds.find(function(x){return x.id===id;});if(!r)return;var mrt=document.getElementById('mr-title');if(mrt)mrt.innerHTML='📋 '+r.reason+' <button class="mclose" onclick="cm(\'m-round\')">✕</button>';var rows=MB.map(function(m){var pd=rPaid(r.id,m.id),pe=rPend(r.id,m.id);var st=pd?'<span class="pill green">✅</span>':pe?'<span class="pill gold">⏳</span>':'<span class="pill red">❌</span>';var sl=slps.find(function(s){return s.roundId===r.id&&s.memberId===m.id;});return '<tr><td style="font-size:11px;color:var(--text3)">'+m.id+'</td><td style="font-size:13px">'+m.name+'</td><td>'+st+'</td><td>'+(sl?'<button class="btn ghost sm" onclick="viewSlip(\''+sl.id+'\')">ดูสลิป</button>':'')+'</td></tr>';}).join('');setHTML('mr-body','<div style="font-size:13px;color:var(--text2);margin-bottom:12px">กำหนด: '+new Date(r.date+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'})+' · ฿'+r.amount.toLocaleString()+'</div><div class="tblw"><table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>สถานะ</th><th>สลิป</th></tr></thead><tbody>'+rows+'</tbody></table></div>');var mr=document.getElementById('m-round');if(mr)mr.classList.add('show');}
+function fillRndSel(){var s=document.getElementById('rec-round');if(!s)return;s.innerHTML='<option value="">-- เลือกรอบ --</option>';rnds.forEach(function(r){var o=document.createElement('option');o.value=r.id;o.textContent=r.reason+' (฿'+r.amount.toLocaleString()+')';if(r.status==='active')o.selected=true;s.appendChild(o);});}
+function recordPayment(){if(ADMINS.indexOf(CU.id)===-1)return;var mid=document.getElementById('rec-member').value;var amt=parseFloat(document.getElementById('rec-amt').value)||0;var rid=document.getElementById('rec-round').value;var note=document.getElementById('rec-note').value.trim();if(!mid){toast('กรุณาเลือกสมาชิก','error');return;}if(amt<=0){toast('กรุณาระบุจำนวนเงิน','error');return;}pays.push({id:'p_'+Date.now(),memberId:mid,amount:amt,note:note,roundId:rid,recordedBy:CU.id,time:Date.now()});sd();var m=MB.find(function(x){return x.id===mid;});document.getElementById('rec-member').value='';document.getElementById('rec-amt').value='';document.getElementById('rec-note').value='';showOK('🎉','บันทึกสำเร็จ!',(m?m.name:mid)+' ชำระ ฿'+amt.toLocaleString()+(note?' ('+note+')':''));}
+function renderSlipQ(){var pend=slps.filter(function(s){return s.status==='pending';}).sort(function(a,b){return b.time-a.time;});var badge=document.getElementById('slip-badge');if(badge){if(pend.length){badge.textContent=pend.length+' รอตรวจ';badge.style.display='inline-block';}else badge.style.display='none';}var el=document.getElementById('slip-queue');if(!el)return;if(!pend.length){el.innerHTML='<p style="font-size:13px;color:var(--text3)">ไม่มีสลิปรอตรวจสอบ 🎉</p>';return;}el.innerHTML=pend.map(function(s){return '<div class="sqrow"><div style="display:flex;align-items:center;gap:10px"><img class="sqthumb" src="'+s.image+'" onclick="viewSlip(\''+s.id+'\')"/><div><div style="font-size:14px;font-weight:700">'+s.memberName+'</div><div style="font-size:12px;color:var(--text2)">'+s.roundReason+' · ฿'+s.amount.toLocaleString()+'</div><div style="font-size:11px;color:var(--text3)">'+fdt(s.time)+'</div></div></div><div style="display:flex;gap:6px"><button class="btn green sm" onclick="appSlip(\''+s.id+'\')">✅ อนุมัติ</button><button class="btn red sm" onclick="rejSlip(\''+s.id+'\')">❌ ปฏิเสธ</button></div></div>';}).join('');}
+function viewSlip(id){var s=slps.find(function(x){return x.id===id;});if(!s)return;var mi=document.getElementById('ms-img');if(mi)mi.src=s.image;setHTML('ms-info','<b>'+s.memberName+'</b> · '+s.roundReason+' · ฿'+s.amount.toLocaleString()+'<br>สถานะ: <span style="color:'+(s.status==='approved'?'var(--green)':s.status==='rejected'?'var(--red)':'var(--gold)')+';font-weight:700">'+(s.status==='approved'?'✅ อนุมัติแล้ว':s.status==='rejected'?'❌ ปฏิเสธแล้ว':'⏳ รอตรวจ')+'</span>');var act=document.getElementById('ms-act');if(act)act.innerHTML=(ADMINS.indexOf(CU.id)!==-1&&s.status==='pending')?'<button class="btn green sm" onclick="appSlip(\''+s.id+'\');cm(\'m-slip\')">✅ อนุมัติ</button><button class="btn red sm" onclick="rejSlip(\''+s.id+'\');cm(\'m-slip\')">❌ ปฏิเสธ</button>':'';var ms=document.getElementById('m-slip');if(ms)ms.classList.add('show');}
+function appSlip(id){var s=slps.find(function(x){return x.id===id;});if(!s)return;s.status='approved';if(!pays.find(function(p){return p.memberId===s.memberId&&p.roundId===s.roundId;}))pays.push({id:'slp_'+id,memberId:s.memberId,amount:s.amount,note:'โอนผ่านสลิป',roundId:s.roundId,recordedBy:CU.id,time:Date.now()});sd();renderSlipQ();renderMembers();toast('อนุมัติสลิปของ '+s.memberName,'success');}
+function rejSlip(id){var s=slps.find(function(x){return x.id===id;});if(!s)return;s.status='rejected';sd();renderSlipQ();renderMembers();toast('ปฏิเสธสลิปของ '+s.memberName,'error');}
+
+function dlPDF(){var total=pays.reduce(function(s,p){return s+p.amount;},0);var ar=getAR();var now=new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});var paidSet=new Set(pays.map(function(p){return p.memberId;}));var rows=MB.map(function(m){var t=mtotal(m.id);var lp=mpays(m.id).sort(function(a,b){return b.time-a.time;})[0];var st=t>0?'จ่ายแล้ว':'ยังไม่จ่าย';if(ar){if(rPaid(ar.id,m.id))st='จ่ายแล้ว ✅';else if(rPend(ar.id,m.id))st='รอตรวจสลิป ⏳';else st='ยังไม่จ่าย ❌';}return '<tr><td>'+m.id+'</td><td>'+m.name+'</td><td style="color:'+(t>0?'#059669':'#dc2626')+'">'+st+'</td><td>฿'+t.toLocaleString()+'</td><td>'+(lp?fd(lp.time):'-')+'</td></tr>';}).join('');var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>#dekhuso2stcp</title><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet"><style>*{font-family:Noto Sans Thai,sans-serif}body{padding:2rem;color:#1e1b4b;background:#f0f2ff;font-size:13px}h1{font-size:22px;font-weight:800;color:#4f46e5;margin-bottom:4px}.meta{color:#6b7280;font-size:12px;margin-bottom:20px}.srow{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap}.sb{background:#fff;border-radius:12px;padding:14px 18px;min-width:110px;box-shadow:0 2px 8px rgba(99,102,241,.08)}.sl{font-size:11px;color:#6b7280}.sv{font-size:22px;font-weight:800}table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(99,102,241,.08)}th{background:#e0e7ff;color:#3730a3;padding:10px 12px;text-align:left;font-size:12px;font-weight:700}td{padding:9px 12px;border-bottom:1px solid #e5e7eb;font-size:13px}.foot{margin-top:20px;font-size:11px;color:#9ca3af;text-align:center}</style></head><body><h1>#dekhuso2stcp · สรุปเงินห้อง</h1><div class="meta">สร้างเมื่อ '+now+(ar?' · รอบ: '+ar.reason:'')+'</div><div class="srow"><div class="sb"><div class="sl">เงินรวม</div><div class="sv" style="color:#4f46e5">฿'+total.toLocaleString()+'</div></div><div class="sb"><div class="sl">สมาชิก</div><div class="sv">'+MB.length+' คน</div></div><div class="sb"><div class="sl">จ่ายแล้ว</div><div class="sv" style="color:#059669">'+paidSet.size+' คน</div></div><div class="sb"><div class="sl">ยังไม่จ่าย</div><div class="sv" style="color:#dc2626">'+(MB.length-paidSet.size)+' คน</div></div></div><table><thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>สถานะ</th><th>ยอดสะสม</th><th>ครั้งล่าสุด</th></tr></thead><tbody>'+rows+'</tbody></table><div class="foot">#dekhuso2stcp · บันทึกอัตโนมัติ</div></body></html>';var b=new Blob([html],{type:'text/html;charset=utf-8'});var u=URL.createObjectURL(b);var a=document.createElement('a');a.href=u;a.download='dekhuso2stcp.html';a.click();URL.revokeObjectURL(u);toast('ดาวน์โหลดแล้ว','success');}
+
+function showOK(emoji,title,body){setText('m-emoji',emoji);setText('m-title',title);setText('m-body',body);var el=document.getElementById('m-ok');if(el)el.classList.add('show');}
+function cm(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
+function toast(msg,type){var c=document.getElementById('twrap');if(!c)return;var t=document.createElement('div');t.className='toast '+(type||'success');t.innerHTML='<span>'+({success:'✅',error:'⚠️',info:'🔔'}[type]||'✅')+'</span>'+msg;c.appendChild(t);setTimeout(function(){t.remove();},3200);}
+document.querySelectorAll('.mbg').forEach(function(el){el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('show');});});
+ld();
+</script>
+</body>
+</html>
