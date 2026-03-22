@@ -252,8 +252,8 @@ tr:hover td{background:#f8f9ff}
   <div class="tabs">
     <button class="tab active" id="tab-home"    onclick="showTab('home')">🏠 หน้าหลัก</button>
     <button class="tab"        id="tab-members" onclick="showTab('members')">👥 สมาชิก</button>
-    <button class="tab"        id="tab-pay"     onclick="showTab('pay')">💳 จ่ายเงิน</button>
-    <button class="tab"        id="tab-history" onclick="showTab('history')">📋 ประวัติ</button>
+    <button class="tab"        id="tab-pay"     onclick="showTab('pay')" style="position:relative">💳 จ่ายเงิน<span id="pay-dot" style="display:none;position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--red)"></span></button>
+    <button class="tab"        id="tab-history" onclick="showTab('history')" style="display:none">📋 ประวัติ</button>
     <button class="tab"        id="tab-profile" onclick="showTab('profile')">👤 โปรไฟล์</button>
     <button class="tab"        id="tab-expense" onclick="showTab('expense')">💸 รายจ่าย</button>
     <button class="tab"        id="tab-admin"   onclick="showTab('admin')" style="display:none">⚙️ หลังบ้าน</button>
@@ -553,7 +553,20 @@ function doLogout(){
   setText('login-err','');
   ld();
 }
-function logV(){var today=new Date().toDateString();vis=vis.filter(function(v){return !(v.id===CU.id&&new Date(v.time).toDateString()===today);});vis.unshift({id:CU.id,name:CU.name,time:Date.now()});if(vis.length>300)vis=vis.slice(0,300);sd();}
+function logV(){
+  var today=new Date().toDateString();
+  var ua=navigator.userAgent;
+  var device='Unknown';
+  if(/iPhone/.test(ua))device='iPhone';
+  else if(/iPad/.test(ua))device='iPad';
+  else if(/Android/.test(ua)){var m=ua.match(/Android[^;]*;\s*([^)]+)/);device=m?m[1].trim():'Android';}
+  else if(/Windows/.test(ua))device='Windows PC';
+  else if(/Macintosh/.test(ua))device='Mac';
+  vis=vis.filter(function(v){return !(v.id===CU.id&&new Date(v.time).toDateString()===today);});
+  vis.unshift({id:CU.id,name:CU.name,time:Date.now(),device:device});
+  if(vis.length>300)vis=vis.slice(0,300);
+  sd();
+}
 
 function initApp(){
   var loginEl=document.getElementById('s-login');var mainEl=document.getElementById('s-main');
@@ -563,12 +576,22 @@ function initApp(){
   setText('nav-name',CU.name.split(' ')[0]||CU.name);
   var nb=document.getElementById('nav-badge');if(nb)nb.style.display=isA?'inline-flex':'none';
   var ta=document.getElementById('tab-admin');if(ta)ta.style.display=isA?'block':'none';
+  var th=document.getElementById('tab-history');if(th)th.style.display=isA?'block':'none';
   if(isA){
     var ms=document.getElementById('rec-member');
     if(ms){ms.innerHTML='<option value="">-- เลือกชื่อ --</option>';MB.forEach(function(m){var o=document.createElement('option');o.value=m.id;o.textContent=m.id+' - '+m.name;ms.appendChild(o);});}
   }
   showTab('home');
-  setTimeout(function(){var ar=getAR();if(ar&&!rPaid(ar.id,CU.id)&&!rPend(ar.id,CU.id))toast('มีรอบเก็บเงิน: '+ar.reason,'info');},900);
+  setTimeout(function(){
+    var ar=getAR();
+    var dot=document.getElementById('pay-dot');
+    if(ar&&!rPaid(ar.id,CU.id)&&!rPend(ar.id,CU.id)){
+      if(dot)dot.style.display='block';
+      toast('มีรอบเก็บเงิน: '+ar.reason,'info');
+    } else {
+      if(dot)dot.style.display='none';
+    }
+  },900);
 }
 
 var ALL_TABS=['home','members','pay','history','profile','expense','admin'];
@@ -615,9 +638,11 @@ function renderMembers(){
 
 function renderPay(){
   var ar=getAR();var noR=document.getElementById('pay-noround');var pM=document.getElementById('pay-main');
-  if(!ar){if(noR)noR.style.display='block';if(pM)pM.style.display='none';setHTML('pay-sts','');return;}
+  var dot=document.getElementById('pay-dot');
+  if(!ar){if(noR)noR.style.display='block';if(pM)pM.style.display='none';setHTML('pay-sts','');if(dot)dot.style.display='none';return;}
   if(noR)noR.style.display='none';if(pM)pM.style.display='block';
   var paid=rPaid(ar.id,CU.id),pend=rPend(ar.id,CU.id);
+  if(dot)dot.style.display=(!paid&&!pend)?'block':'none';
   var ds=new Date(ar.date+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
   if(paid)setHTML('pay-sts','<div class="banner success"><div class="btitle">✅ คุณชำระเงินแล้ว!</div><div class="bsub">รอบ: '+ar.reason+'</div></div>');
   else if(pend)setHTML('pay-sts','<div class="banner info"><div class="btitle">⏳ สลิปรอการตรวจสอบ</div><div class="bsub">ผู้ดูแลจะยืนยันเร็วๆ นี้</div></div>');
@@ -636,7 +661,7 @@ function editPay(id){var p=pays.find(function(x){return x.id===id;});if(!p)retur
 
 function renderRounds(){var el=document.getElementById('admin-rounds');if(!el)return;if(!rnds.length){el.innerHTML='<p style="font-size:13px;color:var(--text3)">ยังไม่มีรอบ</p>';return;}el.innerHTML=rnds.map(function(r){var pc=MB.filter(function(m){return rPaid(r.id,m.id);}).length;var pdc=slps.filter(function(s){return s.roundId===r.id&&s.status==='pending';}).length;var ds=new Date(r.date+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});return '<div class="ritem'+(r.status==='active'?' aopen':'')+'"><div class="rrow"><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="pill '+(r.status==='active'?'gold':'gray')+'">'+(r.status==='active'?'🟢 เปิดอยู่':'⚫ ปิดแล้ว')+'</span><span class="rttl">'+r.reason+'</span></div><div class="rmeta"><span>📅 '+ds+'</span><span>💰 ฿'+r.amount.toLocaleString()+'</span><span style="color:var(--green);font-weight:600">✅ '+pc+'/'+MB.length+'</span>'+(pdc>0?'<span style="color:var(--gold);font-weight:600">⏳ รอตรวจ '+pdc+'</span>':'')+'</div></div><div class="ract">'+(r.status==='active'?'<button class="btn ghost sm" onclick="closeRound(\''+r.id+'\')">ปิดรอบ</button>':'')+'<button class="btn ghost sm" onclick="showRndDetail(\''+r.id+'\')">รายละเอียด</button><button class="btn red sm" onclick="delRound(\''+r.id+'\')">🗑 ลบ</button></div></div></div>';}).join('');}
 function delRound(id){if(!confirm('ลบรอบนี้? (รายการชำระที่เชื่อมกับรอบนี้จะถูกลบด้วย)'))return;pays=pays.filter(function(p){return p.roundId!==id;});slps=slps.filter(function(s){return s.roundId!==id;});rnds=rnds.filter(function(r){return r.id!==id;});sd();renderRounds();fillRndSel();renderHome();renderMembers();toast('ลบรอบแล้ว','success');}
-function renderVis(){var today=new Date().toDateString();var vt=vis.filter(function(v){return new Date(v.time).toDateString()===today;});setText('vis-sum','เข้าวันนี้ '+new Set(vt.map(function(v){return v.id;})).size+' คน · ทั้งหมด '+new Set(vis.map(function(v){return v.id;})).size+' คน');if(!vis.length){setHTML('vis-list','<p style="font-size:13px;color:var(--text3)">ยังไม่มีข้อมูล</p>');return;}setHTML('vis-list',vis.slice(0,60).map(function(v){var isT=new Date(v.time).toDateString()===today;return '<div class="vrow"><div class="vdot" style="background:'+(isT?'var(--green)':'var(--text3)')+'"></div><div style="flex:1"><div class="vname">'+v.name+'</div><div class="vtime">'+fdt(v.time)+'</div></div>'+(isT?'<span class="pill green" style="font-size:11px;padding:2px 8px">วันนี้</span>':'')+'</div>';}).join(''));}
+function renderVis(){var today=new Date().toDateString();var vt=vis.filter(function(v){return new Date(v.time).toDateString()===today;});setText('vis-sum','เข้าวันนี้ '+new Set(vt.map(function(v){return v.id;})).size+' คน · ทั้งหมด '+new Set(vis.map(function(v){return v.id;})).size+' คน');if(!vis.length){setHTML('vis-list','<p style="font-size:13px;color:var(--text3)">ยังไม่มีข้อมูล</p>');return;}setHTML('vis-list',vis.slice(0,60).map(function(v){var isT=new Date(v.time).toDateString()===today;return '<div class="vrow"><div class="vdot" style="background:'+(isT?'var(--green)':'var(--text3)')+'"></div><div style="flex:1"><div class="vname">'+v.name+'</div><div class="vtime">'+fdt(v.time)+(v.device?' · 📱 '+v.device:'')+'</div></div>'+(isT?'<span class="pill green" style="font-size:11px;padding:2px 8px">วันนี้</span>':'')+'</div>';}).join(''));}
 
 function renderProf(){if(!CU)return;var pr=pros[CU.id]||{};var pavEl=document.getElementById('prof-av');if(pavEl){if(pr.avatar){pavEl.innerHTML='<img src="'+pr.avatar+'" style="width:100%;height:100%;object-fit:cover"><div class="pcam">📷</div>';navRefresh();}else{pavEl.innerHTML='<span>'+CU.name.slice(0,2)+'</span><div class="pcam">📷</div>';}}setText('prof-name',CU.name);setText('prof-id','รหัส '+CU.id+(ADMINS.indexOf(CU.id)!==-1?' · ผู้ดูแลห้อง 👑':''));setText('prof-total','฿'+mtotal(CU.id).toLocaleString());var plist=mpays(CU.id).sort(function(a,b){return b.time-a.time;});if(!plist.length){setHTML('prof-hist','<p style="font-size:13px;color:var(--text3)">ยังไม่มีรายการ</p>');return;}setHTML('prof-hist',plist.map(function(p){return '<div class="hi"><div class="hil"><div class="hidot"></div><div><div class="hiname">ชำระเงิน'+(p.note?' - '+p.note:'')+'</div><div class="hidate">'+fdt(p.time)+'</div></div></div><div class="hiamt">+฿'+p.amount.toLocaleString()+'</div></div>';}).join(''));}
 function handleAvatar(e){var f=e.target.files[0];if(!f||!CU)return;var r=new FileReader();r.onload=function(ev){if(!pros[CU.id])pros[CU.id]={};pros[CU.id].avatar=ev.target.result;sd();renderProf();toast('อัพโหลดรูปสำเร็จ','success');};r.readAsDataURL(f);}
