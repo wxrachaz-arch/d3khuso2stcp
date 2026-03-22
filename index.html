@@ -255,6 +255,7 @@ tr:hover td{background:#f8f9ff}
     <button class="tab"        id="tab-pay"     onclick="showTab('pay')">💳 จ่ายเงิน</button>
     <button class="tab"        id="tab-history" onclick="showTab('history')">📋 ประวัติ</button>
     <button class="tab"        id="tab-profile" onclick="showTab('profile')">👤 โปรไฟล์</button>
+    <button class="tab"        id="tab-expense" onclick="showTab('expense')">💸 รายจ่าย</button>
     <button class="tab"        id="tab-admin"   onclick="showTab('admin')" style="display:none">⚙️ หลังบ้าน</button>
   </div>
   <div class="pages">
@@ -355,6 +356,42 @@ tr:hover td{background:#f8f9ff}
       </div>
     </div>
 
+    <!-- EXPENSE -->
+    <div class="page" id="page-expense">
+      <!-- ยอดคงเหลือ -->
+      <div class="stat-grid">
+        <div class="stat green"><div class="stat-lbl">💰 รายรับรวม</div><div class="stat-v green" id="exp-income">฿0</div><div class="stat-sub">บาท</div></div>
+        <div class="stat red"><div class="stat-lbl">💸 รายจ่ายรวม</div><div class="stat-v red" id="exp-total">฿0</div><div class="stat-sub">บาท</div></div>
+      </div>
+      <div class="banner info" style="text-align:center;margin-bottom:14px">
+        <div class="btitle">🏦 ยอดคงเหลือ</div>
+        <div style="font-size:32px;font-weight:800;color:var(--purple4);margin:6px 0" id="exp-balance">฿0</div>
+      </div>
+      <!-- ฟอร์มบันทึกรายจ่าย (admin เท่านั้น) -->
+      <div id="exp-form-wrap">
+        <div class="sec-h">➕ บันทึกรายจ่ายใหม่</div>
+        <div class="card">
+          <div class="fgrid">
+            <div class="span2"><label class="flbl">รายการ</label><input class="finp" type="text" id="exp-name" placeholder="เช่น ซื้อของตกแต่งห้อง"/></div>
+            <div><label class="flbl">จำนวนเงิน (บาท)</label><input class="finp" type="number" id="exp-amt" placeholder="0" min="1"/></div>
+            <div><label class="flbl">วันที่</label><input class="finp" type="date" id="exp-date"/></div>
+            <div class="span2"><label class="flbl">หมายเหตุ</label><input class="finp" type="text" id="exp-note" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"/></div>
+            <div class="span2"><label class="flbl">แนบรูปใบเสร็จ</label>
+              <div class="slipzone" id="exp-zone">
+                <input type="file" id="exp-file" accept="image/*" onchange="handleExpImg(event)"/>
+                <div id="exp-ph"><div style="font-size:28px;margin-bottom:6px">🧾</div><div style="font-size:13px;font-weight:700;color:var(--text2)">แตะเพื่อแนบใบเสร็จ</div></div>
+                <img id="exp-imgp" class="slipimgp"/>
+              </div>
+            </div>
+          </div>
+          <button class="btn red full" onclick="addExpense()">💸 บันทึกรายจ่าย</button>
+        </div>
+      </div>
+      <!-- รายการรายจ่าย -->
+      <div class="sec-h">📋 ประวัติรายจ่าย</div>
+      <div class="card"><div id="exp-list"><p style="font-size:13px;color:var(--text3)">ยังไม่มีรายจ่าย</p></div></div>
+    </div>
+
     <!-- ADMIN -->
     <div class="page" id="page-admin">
       <div class="sec-h">📅 สร้างรอบเก็บเงิน</div>
@@ -414,7 +451,14 @@ tr:hover td{background:#f8f9ff}
     <div id="mr-body"></div>
   </div>
 </div>
-<div class="twrap" id="twrap"></div>
+<div class="mbg" id="m-exp">
+  <div class="modal">
+    <div class="mh">🧾 ใบเสร็จ <button class="mclose" onclick="cm('m-exp')">✕</button></div>
+    <img id="me-img" style="width:100%;border-radius:12px;max-height:320px;object-fit:contain"/>
+    <div id="me-info" style="font-size:13px;color:var(--text2);margin-top:10px;line-height:1.6"></div>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
@@ -455,7 +499,7 @@ var MB=[
   {id:'39258',name:'วีระชัย โยธา'},{id:'39333',name:'ชินพงษ์ วงษา'},
 ];
 var ADMINS=['37141','39258'];
-var CU=null,pays=[],pros={},rnds=[],slps=[],vis=[],curSlip=null;
+var CU=null,pays=[],pros={},rnds=[],slps=[],vis=[],exps=[],curSlip=null,curExpImg=null;
 
 function ld(){
   db.ref('data').on('value',function(snap){
@@ -465,17 +509,19 @@ function ld(){
     rnds=d.rnds||[];
     slps=d.slps||[];
     vis=d.vis||[];
+    exps=d.exps||[];
     if(CU){
       if(document.getElementById('page-home').classList.contains('show'))renderHome();
       if(document.getElementById('page-members').classList.contains('show'))renderMembers();
       if(document.getElementById('page-history').classList.contains('show')){renderHistory();renderVis();}
+      if(document.getElementById('page-expense').classList.contains('show'))renderExpense();
       if(document.getElementById('page-admin').classList.contains('show')){renderRounds();renderSlipQ();}
       renderPay();
     }
   });
 }
 function sd(){
-  db.ref('data').set({pays:pays,pros:pros,rnds:rnds,slps:slps,vis:vis}).catch(function(){toast('บันทึกไม่สำเร็จ','error');});
+  db.ref('data').set({pays:pays,pros:pros,rnds:rnds,slps:slps,vis:vis,exps:exps}).catch(function(){toast('บันทึกไม่สำเร็จ','error');});
 }
 function setText(id,val){var el=document.getElementById(id);if(el)el.textContent=val;}
 function setHTML(id,val){var el=document.getElementById(id);if(el)el.innerHTML=val;}
@@ -525,7 +571,7 @@ function initApp(){
   setTimeout(function(){var ar=getAR();if(ar&&!rPaid(ar.id,CU.id)&&!rPend(ar.id,CU.id))toast('มีรอบเก็บเงิน: '+ar.reason,'info');},900);
 }
 
-var ALL_TABS=['home','members','pay','history','profile','admin'];
+var ALL_TABS=['home','members','pay','history','profile','expense','admin'];
 function showTab(t){
   ALL_TABS.forEach(function(x){var p=document.getElementById('page-'+x);if(p)p.classList.remove('show');var b=document.getElementById('tab-'+x);if(b)b.classList.remove('active');});
   var pg=document.getElementById('page-'+t);if(pg)pg.classList.add('show');
@@ -535,6 +581,7 @@ function showTab(t){
   if(t==='pay')renderPay();
   if(t==='history'){renderHistory();renderVis();}
   if(t==='profile')renderProf();
+  if(t==='expense')renderExpense();
   if(t==='admin'){fillRndSel();renderRounds();renderSlipQ();}
 }
 
@@ -595,7 +642,6 @@ function renderProf(){if(!CU)return;var pr=pros[CU.id]||{};var pavEl=document.ge
 function handleAvatar(e){var f=e.target.files[0];if(!f||!CU)return;var r=new FileReader();r.onload=function(ev){if(!pros[CU.id])pros[CU.id]={};pros[CU.id].avatar=ev.target.result;sd();renderProf();toast('อัพโหลดรูปสำเร็จ','success');};r.readAsDataURL(f);}
 
 function createRound(){if(ADMINS.indexOf(CU.id)===-1)return;var date=document.getElementById('r-date').value;var amt=parseFloat(document.getElementById('r-amt').value)||0;var reason=document.getElementById('r-reason').value.trim();if(!date){toast('กรุณาเลือกวันที่','error');return;}if(amt<=0){toast('กรุณาระบุจำนวนเงิน','error');return;}if(!reason){toast('กรุณาระบุเหตุผล','error');return;}rnds.forEach(function(r){if(r.status==='active')r.status='closed';});rnds.unshift({id:'r_'+Date.now(),date:date,amount:amt,reason:reason,status:'active',by:CU.id,time:Date.now()});sd();document.getElementById('r-date').value='';document.getElementById('r-amt').value='';document.getElementById('r-reason').value='';renderRounds();fillRndSel();toast('ประกาศรอบเก็บเงินแล้ว!','success');}
-function renderRounds(){var el=document.getElementById('admin-rounds');if(!el)return;if(!rnds.length){el.innerHTML='<p style="font-size:13px;color:var(--text3)">ยังไม่มีรอบ</p>';return;}el.innerHTML=rnds.map(function(r){var pc=MB.filter(function(m){return rPaid(r.id,m.id);}).length;var pdc=slps.filter(function(s){return s.roundId===r.id&&s.status==='pending';}).length;var ds=new Date(r.date+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});return '<div class="ritem'+(r.status==='active'?' aopen':'')+'"><div class="rrow"><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="pill '+(r.status==='active'?'gold':'gray')+'">'+(r.status==='active'?'🟢 เปิดอยู่':'⚫ ปิดแล้ว')+'</span><span class="rttl">'+r.reason+'</span></div><div class="rmeta"><span>📅 '+ds+'</span><span>💰 ฿'+r.amount.toLocaleString()+'</span><span style="color:var(--green);font-weight:600">✅ '+pc+'/'+MB.length+'</span>'+(pdc>0?'<span style="color:var(--gold);font-weight:600">⏳ รอตรวจ '+pdc+'</span>':'')+'</div></div><div class="ract">'+(r.status==='active'?'<button class="btn ghost sm" onclick="closeRound(\''+r.id+'\')">ปิดรอบ</button>':'')+'<button class="btn ghost sm" onclick="showRndDetail(\''+r.id+'\')">รายละเอียด</button></div></div></div>';}).join('');}
 function closeRound(id){var r=rnds.find(function(x){return x.id===id;});if(r)r.status='closed';sd();renderRounds();toast('ปิดรอบแล้ว','success');}
 function showRndDetail(id){var r=rnds.find(function(x){return x.id===id;});if(!r)return;var mrt=document.getElementById('mr-title');if(mrt)mrt.innerHTML='📋 '+r.reason+' <button class="mclose" onclick="cm(\'m-round\')">✕</button>';var rows=MB.map(function(m){var pd=rPaid(r.id,m.id),pe=rPend(r.id,m.id);var st=pd?'<span class="pill green">✅</span>':pe?'<span class="pill gold">⏳</span>':'<span class="pill red">❌</span>';var sl=slps.find(function(s){return s.roundId===r.id&&s.memberId===m.id;});return '<tr><td style="font-size:11px;color:var(--text3)">'+m.id+'</td><td style="font-size:13px">'+m.name+'</td><td>'+st+'</td><td>'+(sl?'<button class="btn ghost sm" onclick="viewSlip(\''+sl.id+'\')">ดูสลิป</button>':'')+'</td></tr>';}).join('');setHTML('mr-body','<div style="font-size:13px;color:var(--text2);margin-bottom:12px">กำหนด: '+new Date(r.date+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'})+' · ฿'+r.amount.toLocaleString()+'</div><div class="tblw"><table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>สถานะ</th><th>สลิป</th></tr></thead><tbody>'+rows+'</tbody></table></div>');var mr=document.getElementById('m-round');if(mr)mr.classList.add('show');}
 function fillRndSel(){var s=document.getElementById('rec-round');if(!s)return;s.innerHTML='<option value="">-- เลือกรอบ --</option>';rnds.forEach(function(r){var o=document.createElement('option');o.value=r.id;o.textContent=r.reason+' (฿'+r.amount.toLocaleString()+')';if(r.status==='active')o.selected=true;s.appendChild(o);});}
@@ -607,6 +653,50 @@ function rejSlip(id){var s=slps.find(function(x){return x.id===id;});if(!s)retur
 
 function dlPDF(){var total=pays.reduce(function(s,p){return s+p.amount;},0);var ar=getAR();var now=new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});var paidSet=new Set(pays.map(function(p){return p.memberId;}));var rows=MB.map(function(m){var t=mtotal(m.id);var lp=mpays(m.id).sort(function(a,b){return b.time-a.time;})[0];var st=t>0?'จ่ายแล้ว':'ยังไม่จ่าย';if(ar){if(rPaid(ar.id,m.id))st='จ่ายแล้ว ✅';else if(rPend(ar.id,m.id))st='รอตรวจสลิป ⏳';else st='ยังไม่จ่าย ❌';}return '<tr><td>'+m.id+'</td><td>'+m.name+'</td><td style="color:'+(t>0?'#059669':'#dc2626')+'">'+st+'</td><td>฿'+t.toLocaleString()+'</td><td>'+(lp?fd(lp.time):'-')+'</td></tr>';}).join('');var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>#dekhuso2stcp</title><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet"><style>*{font-family:Noto Sans Thai,sans-serif}body{padding:2rem;color:#1e1b4b;background:#f0f2ff;font-size:13px}h1{font-size:22px;font-weight:800;color:#4f46e5;margin-bottom:4px}.meta{color:#6b7280;font-size:12px;margin-bottom:20px}.srow{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap}.sb{background:#fff;border-radius:12px;padding:14px 18px;min-width:110px;box-shadow:0 2px 8px rgba(99,102,241,.08)}.sl{font-size:11px;color:#6b7280}.sv{font-size:22px;font-weight:800}table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(99,102,241,.08)}th{background:#e0e7ff;color:#3730a3;padding:10px 12px;text-align:left;font-size:12px;font-weight:700}td{padding:9px 12px;border-bottom:1px solid #e5e7eb;font-size:13px}.foot{margin-top:20px;font-size:11px;color:#9ca3af;text-align:center}</style></head><body><h1>#dekhuso2stcp · สรุปเงินห้อง</h1><div class="meta">สร้างเมื่อ '+now+(ar?' · รอบ: '+ar.reason:'')+'</div><div class="srow"><div class="sb"><div class="sl">เงินรวม</div><div class="sv" style="color:#4f46e5">฿'+total.toLocaleString()+'</div></div><div class="sb"><div class="sl">สมาชิก</div><div class="sv">'+MB.length+' คน</div></div><div class="sb"><div class="sl">จ่ายแล้ว</div><div class="sv" style="color:#059669">'+paidSet.size+' คน</div></div><div class="sb"><div class="sl">ยังไม่จ่าย</div><div class="sv" style="color:#dc2626">'+(MB.length-paidSet.size)+' คน</div></div></div><table><thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>สถานะ</th><th>ยอดสะสม</th><th>ครั้งล่าสุด</th></tr></thead><tbody>'+rows+'</tbody></table><div class="foot">#dekhuso2stcp · บันทึกอัตโนมัติ</div></body></html>';var b=new Blob([html],{type:'text/html;charset=utf-8'});var u=URL.createObjectURL(b);var a=document.createElement('a');a.href=u;a.download='dekhuso2stcp.html';a.click();URL.revokeObjectURL(u);toast('ดาวน์โหลดแล้ว','success');}
 
+function handleExpImg(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){curExpImg=ev.target.result;var img=document.getElementById('exp-imgp');if(img){img.src=curExpImg;img.style.display='block';}var ph=document.getElementById('exp-ph');if(ph)ph.style.display='none';};r.readAsDataURL(f);}
+function addExpense(){
+  if(ADMINS.indexOf(CU.id)===-1)return;
+  var name=document.getElementById('exp-name').value.trim();
+  var amt=parseFloat(document.getElementById('exp-amt').value)||0;
+  var date=document.getElementById('exp-date').value;
+  var note=document.getElementById('exp-note').value.trim();
+  if(!name){toast('กรุณาระบุรายการ','error');return;}
+  if(amt<=0){toast('กรุณาระบุจำนวนเงิน','error');return;}
+  if(!date){toast('กรุณาเลือกวันที่','error');return;}
+  exps.push({id:'e_'+Date.now(),name:name,amount:amt,date:date,note:note,image:curExpImg||null,by:CU.id,time:Date.now()});
+  sd();
+  document.getElementById('exp-name').value='';
+  document.getElementById('exp-amt').value='';
+  document.getElementById('exp-date').value='';
+  document.getElementById('exp-note').value='';
+  document.getElementById('exp-file').value='';
+  var img=document.getElementById('exp-imgp');if(img){img.style.display='none';img.src='';}
+  var ph=document.getElementById('exp-ph');if(ph)ph.style.display='block';
+  curExpImg=null;
+  renderExpense();
+  toast('บันทึกรายจ่ายแล้ว','success');
+}
+function delExpense(id){if(!confirm('ลบรายจ่ายนี้?'))return;exps=exps.filter(function(e){return e.id!==id;});sd();renderExpense();toast('ลบรายจ่ายแล้ว','success');}
+function viewExpImg(id){var e=exps.find(function(x){return x.id===id;});if(!e||!e.image)return;var mi=document.getElementById('me-img');if(mi)mi.src=e.image;setHTML('me-info','<b>'+e.name+'</b> · ฿'+e.amount.toLocaleString()+(e.note?' · '+e.note:''));var m=document.getElementById('m-exp');if(m)m.classList.add('show');}
+function renderExpense(){
+  var isA=ADMINS.indexOf(CU.id)!==-1;
+  var fw=document.getElementById('exp-form-wrap');if(fw)fw.style.display=isA?'block':'none';
+  var income=pays.reduce(function(s,p){return s+p.amount;},0);
+  var total=exps.reduce(function(s,e){return s+e.amount;},0);
+  var bal=income-total;
+  setText('exp-income','฿'+income.toLocaleString());
+  setText('exp-total','฿'+total.toLocaleString());
+  setText('exp-balance','฿'+bal.toLocaleString());
+  var balEl=document.getElementById('exp-balance');
+  if(balEl)balEl.style.color=bal>=0?'var(--purple4)':'var(--red)';
+  if(!exps.length){setHTML('exp-list','<p style="font-size:13px;color:var(--text3)">ยังไม่มีรายจ่าย</p>');return;}
+  var list=[].concat(exps).sort(function(a,b){return b.time-a.time;});
+  setHTML('exp-list',list.map(function(e){
+    var by=MB.find(function(x){return x.id===e.by;});
+    var ds=new Date(e.date+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
+    return '<div class="hi"><div class="hil"><div class="hidot" style="background:var(--red)"></div><div><div class="hiname">'+e.name+'</div><div class="hidate">'+ds+(e.note?' · '+e.note:'')+(by?' · โดย '+by.name.split(' ')[0]:'')+'</div></div></div><div style="display:flex;align-items:center;gap:6px"><div class="hiamt" style="color:var(--red)">-฿'+e.amount.toLocaleString()+'</div>'+(e.image?'<button class="btn ghost sm" onclick="viewExpImg(\''+e.id+'\')">🧾</button>':'')+(isA?'<button class="btn red sm" onclick="delExpense(\''+e.id+'\')">🗑</button>':'')+'</div></div>';
+  }).join(''));
+}
 function showOK(emoji,title,body){setText('m-emoji',emoji);setText('m-title',title);setText('m-body',body);var el=document.getElementById('m-ok');if(el)el.classList.add('show');}
 function cm(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
 function toast(msg,type){var c=document.getElementById('twrap');if(!c)return;var t=document.createElement('div');t.className='toast '+(type||'success');t.innerHTML='<span>'+({success:'✅',error:'⚠️',info:'🔔'}[type]||'✅')+'</span>'+msg;c.appendChild(t);setTimeout(function(){t.remove();},3200);}
