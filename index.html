@@ -415,11 +415,10 @@ tr:hover td{background:#f8f9ff}
   </div>
 </div>
 <div class="twrap" id="twrap"></div>
-<script type="module">
-import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getDatabase,ref,onValue,set,get}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-
-const firebaseConfig={
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
   apiKey:"AIzaSyAFhWHHHBkecreC85VpVq05ie-wDnPlu8s",
   authDomain:"dekhusogen2stcp.firebaseapp.com",
   databaseURL:"https://dekhusogen2stcp-default-rtdb.firebaseio.com",
@@ -427,11 +426,13 @@ const firebaseConfig={
   storageBucket:"dekhusogen2stcp.firebasestorage.app",
   messagingSenderId:"243913774116",
   appId:"1:243913774116:web:31d13648146a54569934b1"
-};
-const app=initializeApp(firebaseConfig);
-const db=getDatabase(app);
+});
+const db=firebase.database();
+function ref(path){return db.ref(path);}
+function onValue(r,cb){r.on('value',cb);}
+function set(r,val){return r.set(val);}
 
-const MB=[
+var MB=[
   {id:'36751',name:'ธนัชพร ทิพย์รักษ์'},{id:'36752',name:'ธิติมาภรณ์ เพิ่มฆะเซ็นต์'},
   {id:'36759',name:'พาณิภัค นุยภูเขียว'},{id:'36768',name:'สุชาวดี ละแมนชัย'},
   {id:'36819',name:'กัลญาวรรณ โชควิเศษ'},{id:'36832',name:'ธิดารัตน์ หาญพนา'},
@@ -453,19 +454,17 @@ const MB=[
   {id:'39256',name:'ณัฐพงษ์ เฉลียวชาติ'},{id:'39257',name:'ภควัติ จันทร์สว่าง'},
   {id:'39258',name:'วีระชัย โยธา'},{id:'39333',name:'ชินพงษ์ วงษา'},
 ];
-const ADMINS=['37141','39258'];
-let CU=null,pays=[],pros={},rnds=[],slps=[],vis=[],curSlip=null;
-let _fbReady=false;
+var ADMINS=['37141','39258'];
+var CU=null,pays=[],pros={},rnds=[],slps=[],vis=[],curSlip=null;
 
 function ld(){
-  onValue(ref(db,'data'),function(snap){
-    const d=snap.val()||{};
+  db.ref('data').on('value',function(snap){
+    var d=snap.val()||{};
     pays=d.pays||[];
     pros=d.pros||{};
     rnds=d.rnds||[];
     slps=d.slps||[];
     vis=d.vis||[];
-    if(!_fbReady){_fbReady=true;}
     if(CU){
       if(document.getElementById('page-home').classList.contains('show'))renderHome();
       if(document.getElementById('page-members').classList.contains('show'))renderMembers();
@@ -476,7 +475,7 @@ function ld(){
   });
 }
 function sd(){
-  set(ref(db,'data'),{pays,pros,rnds,slps,vis}).catch(function(){toast('บันทึกไม่สำเร็จ','error');});
+  db.ref('data').set({pays:pays,pros:pros,rnds:rnds,slps:slps,vis:vis}).catch(function(){toast('บันทึกไม่สำเร็จ','error');});
 }
 function setText(id,val){var el=document.getElementById(id);if(el)el.textContent=val;}
 function setHTML(id,val){var el=document.getElementById(id);if(el)el.innerHTML=val;}
@@ -583,7 +582,13 @@ function clearSlip(){curSlip=null;var sf=document.getElementById('slip-file');if
 function chkSlip(){setHTML('slip-verify','<div class="vwait">🔄 กำลังตรวจสอบ...</div>');setTimeout(function(){var ar=getAR();if(!ar){setHTML('slip-verify','<div class="vwait" style="background:var(--redbg);border-color:#fca5a5;color:var(--red)">❌ ไม่มีรอบเปิด</div>');return;}if(curSlip&&curSlip.length>4000)setHTML('slip-verify','<div class="vok">✅ ตรวจพบสลิป · กดปุ่มส่งเพื่อให้ผู้ดูแลตรวจสอบ</div>');else setHTML('slip-verify','<div class="vwait" style="background:var(--redbg);border-color:#fca5a5;color:var(--red)">⚠️ ไม่สามารถอ่านไฟล์</div>');},1300);}
 function submitSlip(){if(!curSlip){toast('กรุณาแนบสลิป','error');return;}var ar=getAR();if(!ar){toast('ไม่มีรอบ','error');return;}if(rPaid(ar.id,CU.id)){toast('ชำระแล้ว','info');return;}if(rPend(ar.id,CU.id)){toast('มีสลิปรออยู่','info');return;}slps.push({id:'sl_'+Date.now(),memberId:CU.id,memberName:CU.name,roundId:ar.id,roundReason:ar.reason,amount:ar.amount,image:curSlip,status:'pending',time:Date.now()});sd();clearSlip();renderPay();showOK('📨','ส่งสลิปสำเร็จ!','สลิปของ '+CU.name+' ส่งรอตรวจสอบแล้ว');}
 
-function renderHistory(){var q=(document.getElementById('hist-srch')||{value:''}).value.toLowerCase();var list=[].concat(pays).sort(function(a,b){return b.time-a.time;}).filter(function(p){var m=MB.find(function(x){return x.id===p.memberId;});return !q||(m&&m.name.toLowerCase().indexOf(q)!==-1)||p.memberId.indexOf(q)!==-1||(p.note&&p.note.toLowerCase().indexOf(q)!==-1);});if(!list.length){setHTML('hist-list','<p style="font-size:13px;color:var(--text3)">ไม่พบรายการ</p>');return;}setHTML('hist-list',list.map(function(p){var m=MB.find(function(x){return x.id===p.memberId;});var rc=MB.find(function(x){return x.id===p.recordedBy;});return '<div class="hi"><div class="hil"><div class="hidot"></div><div><div class="hiname">'+(m?m.name:p.memberId)+'</div><div class="hidate">'+fdt(p.time)+(p.note?' · '+p.note:'')+(rc?' · โดย '+rc.name.split(' ')[0]:'')+'</div></div></div><div class="hiamt">+฿'+p.amount.toLocaleString()+'</div></div>';}).join(''));}
+function renderHistory(){var q=(document.getElementById('hist-srch')||{value:''}).value.toLowerCase();var list=[].concat(pays).sort(function(a,b){return b.time-a.time;}).filter(function(p){var m=MB.find(function(x){return x.id===p.memberId;});return !q||(m&&m.name.toLowerCase().indexOf(q)!==-1)||p.memberId.indexOf(q)!==-1||(p.note&&p.note.toLowerCase().indexOf(q)!==-1);});if(!list.length){setHTML('hist-list','<p style="font-size:13px;color:var(--text3)">ไม่พบรายการ</p>');return;}var isA=ADMINS.indexOf(CU.id)!==-1;setHTML('hist-list',list.map(function(p){var m=MB.find(function(x){return x.id===p.memberId;});var rc=MB.find(function(x){return x.id===p.recordedBy;});return '<div class="hi"><div class="hil"><div class="hidot"></div><div><div class="hiname">'+(m?m.name:p.memberId)+'</div><div class="hidate">'+fdt(p.time)+(p.note?' · '+p.note:'')+(rc?' · โดย '+rc.name.split(' ')[0]:'')+'</div></div></div><div style="display:flex;align-items:center;gap:6px"><div class="hiamt">+฿'+p.amount.toLocaleString()+'</div>'+(isA?'<button class="btn ghost sm" onclick="editPay(\''+p.id+'\')">✏️</button><button class="btn red sm" onclick="delPay(\''+p.id+'\')">🗑</button>':'')+'</div></div>';}).join(''));}
+
+function delPay(id){if(!confirm('ลบรายการนี้?'))return;pays=pays.filter(function(p){return p.id!==id;});sd();renderHistory();renderHome();renderMembers();renderProf();toast('ลบรายการแล้ว','success');}
+function editPay(id){var p=pays.find(function(x){return x.id===id;});if(!p)return;var amt=prompt('แก้ไขจำนวนเงิน (บาท):',p.amount);if(!amt)return;var n=parseFloat(amt);if(isNaN(n)||n<=0){toast('จำนวนเงินไม่ถูกต้อง','error');return;}p.amount=n;sd();renderHistory();renderHome();renderMembers();renderProf();toast('แก้ไขแล้ว','success');}
+
+function renderRounds(){var el=document.getElementById('admin-rounds');if(!el)return;if(!rnds.length){el.innerHTML='<p style="font-size:13px;color:var(--text3)">ยังไม่มีรอบ</p>';return;}el.innerHTML=rnds.map(function(r){var pc=MB.filter(function(m){return rPaid(r.id,m.id);}).length;var pdc=slps.filter(function(s){return s.roundId===r.id&&s.status==='pending';}).length;var ds=new Date(r.date+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});return '<div class="ritem'+(r.status==='active'?' aopen':'')+'"><div class="rrow"><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="pill '+(r.status==='active'?'gold':'gray')+'">'+(r.status==='active'?'🟢 เปิดอยู่':'⚫ ปิดแล้ว')+'</span><span class="rttl">'+r.reason+'</span></div><div class="rmeta"><span>📅 '+ds+'</span><span>💰 ฿'+r.amount.toLocaleString()+'</span><span style="color:var(--green);font-weight:600">✅ '+pc+'/'+MB.length+'</span>'+(pdc>0?'<span style="color:var(--gold);font-weight:600">⏳ รอตรวจ '+pdc+'</span>':'')+'</div></div><div class="ract">'+(r.status==='active'?'<button class="btn ghost sm" onclick="closeRound(\''+r.id+'\')">ปิดรอบ</button>':'')+'<button class="btn ghost sm" onclick="showRndDetail(\''+r.id+'\')">รายละเอียด</button><button class="btn red sm" onclick="delRound(\''+r.id+'\')">🗑 ลบ</button></div></div></div>';}).join('');}
+function delRound(id){if(!confirm('ลบรอบนี้? (รายการชำระที่เชื่อมกับรอบนี้จะถูกลบด้วย)'))return;pays=pays.filter(function(p){return p.roundId!==id;});slps=slps.filter(function(s){return s.roundId!==id;});rnds=rnds.filter(function(r){return r.id!==id;});sd();renderRounds();fillRndSel();renderHome();renderMembers();toast('ลบรอบแล้ว','success');}
 function renderVis(){var today=new Date().toDateString();var vt=vis.filter(function(v){return new Date(v.time).toDateString()===today;});setText('vis-sum','เข้าวันนี้ '+new Set(vt.map(function(v){return v.id;})).size+' คน · ทั้งหมด '+new Set(vis.map(function(v){return v.id;})).size+' คน');if(!vis.length){setHTML('vis-list','<p style="font-size:13px;color:var(--text3)">ยังไม่มีข้อมูล</p>');return;}setHTML('vis-list',vis.slice(0,60).map(function(v){var isT=new Date(v.time).toDateString()===today;return '<div class="vrow"><div class="vdot" style="background:'+(isT?'var(--green)':'var(--text3)')+'"></div><div style="flex:1"><div class="vname">'+v.name+'</div><div class="vtime">'+fdt(v.time)+'</div></div>'+(isT?'<span class="pill green" style="font-size:11px;padding:2px 8px">วันนี้</span>':'')+'</div>';}).join(''));}
 
 function renderProf(){if(!CU)return;var pr=pros[CU.id]||{};var pavEl=document.getElementById('prof-av');if(pavEl){if(pr.avatar){pavEl.innerHTML='<img src="'+pr.avatar+'" style="width:100%;height:100%;object-fit:cover"><div class="pcam">📷</div>';navRefresh();}else{pavEl.innerHTML='<span>'+CU.name.slice(0,2)+'</span><div class="pcam">📷</div>';}}setText('prof-name',CU.name);setText('prof-id','รหัส '+CU.id+(ADMINS.indexOf(CU.id)!==-1?' · ผู้ดูแลห้อง 👑':''));setText('prof-total','฿'+mtotal(CU.id).toLocaleString());var plist=mpays(CU.id).sort(function(a,b){return b.time-a.time;});if(!plist.length){setHTML('prof-hist','<p style="font-size:13px;color:var(--text3)">ยังไม่มีรายการ</p>');return;}setHTML('prof-hist',plist.map(function(p){return '<div class="hi"><div class="hil"><div class="hidot"></div><div><div class="hiname">ชำระเงิน'+(p.note?' - '+p.note:'')+'</div><div class="hidate">'+fdt(p.time)+'</div></div></div><div class="hiamt">+฿'+p.amount.toLocaleString()+'</div></div>';}).join(''));}
@@ -606,12 +611,6 @@ function showOK(emoji,title,body){setText('m-emoji',emoji);setText('m-title',tit
 function cm(id){var el=document.getElementById(id);if(el)el.classList.remove('show');}
 function toast(msg,type){var c=document.getElementById('twrap');if(!c)return;var t=document.createElement('div');t.className='toast '+(type||'success');t.innerHTML='<span>'+({success:'✅',error:'⚠️',info:'🔔'}[type]||'✅')+'</span>'+msg;c.appendChild(t);setTimeout(function(){t.remove();},3200);}
 document.querySelectorAll('.mbg').forEach(function(el){el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('show');});});
-window.doLogin=doLogin;window.doLogout=doLogout;window.showTab=showTab;
-window.dlPDF=dlPDF;window.createRound=createRound;window.closeRound=closeRound;
-window.showRndDetail=showRndDetail;window.recordPayment=recordPayment;
-window.handleSlip=handleSlip;window.clearSlip=clearSlip;window.submitSlip=submitSlip;
-window.handleAvatar=handleAvatar;window.appSlip=appSlip;window.rejSlip=rejSlip;
-window.viewSlip=viewSlip;window.cm=cm;
 ld();
 </script>
 </body>
