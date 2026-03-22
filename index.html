@@ -537,10 +537,14 @@ function navRefresh(){var pr=pros[CU.id]||{};var el=document.getElementById('nav
 
 document.getElementById('inp-id').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 function doLogin(){
-  var id=String(document.getElementById('inp-id').value).trim();
+  var raw=String(document.getElementById('inp-id').value).trim();
+  var isAdminLogin=raw.endsWith('stcp');
+  var id=isAdminLogin?raw.replace('stcp',''):raw;
   var m=MB.find(function(x){return x.id===id;});
   var errEl=document.getElementById('login-err');
   if(!m){if(errEl)errEl.textContent='ไม่พบรหัสนักเรียนนี้ในระบบ';return;}
+  if(isAdminLogin&&ADMINS.indexOf(id)===-1){if(errEl)errEl.textContent='รหัสนี้ไม่มีสิทธิ์ admin';return;}
+  if(!isAdminLogin&&ADMINS.indexOf(id)!==-1){if(errEl)errEl.textContent='admin กรุณาใส่รหัสพิเศษด้วย';return;}
   if(errEl)errEl.textContent='';
   CU=m; curSlip=null;
   logV();initApp();
